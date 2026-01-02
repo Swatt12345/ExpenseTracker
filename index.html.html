@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-container {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #8892b0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .toggle-btn.active.income {
+            background: #27ae60;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: #8892b0;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #64ffda;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #4a5568;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .amount-input {
+            position: relative;
+        }
+
+        .amount-input span {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8892b0;
+            font-size: 1rem;
+        }
+
+        .amount-input input {
+            padding-left: 32px;
+        }
+
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        .submit-btn.income {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+        }
+
+        .submit-btn.income:hover {
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+            display: block;
+        }
+
+        .status.error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            display: block;
+        }
+
+        .recent-entries {
+            margin-top: 24px;
+        }
+
+        .recent-entries h3 {
+            font-size: 1rem;
+            color: #8892b0;
+            margin-bottom: 12px;
+        }
+
+        .entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .entry:last-child {
+            border-bottom: none;
+        }
+
+        .entry-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .entry-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .entry-icon.expense {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .entry-icon.income {
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .entry-details h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .entry-details p {
+            font-size: 0.8rem;
+            color: #8892b0;
+        }
+
+        .entry-amount {
+            font-weight: 600;
+        }
+
+        .entry-amount.expense {
+            color: #e74c3c;
+        }
+
+        .entry-amount.income {
+            color: #27ae60;
+        }
+
+        .setup-notice {
+            background: rgba(100, 255, 218, 0.1);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: #64ffda;
+        }
+
+        .setup-notice a {
+            color: #64ffda;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Expense Tracker</h1>
+            <p>Track your daily expenses & income</p>
+        </header>
+
+        <div class="setup-notice" id="setupNotice">
+            ⚠️ Setup required: Add your Google Apps Script URL below.<br>
+            <small>See instructions in the script file.</small>
+        </div>
+
+        <div class="card">
+            <div class="toggle-container">
+                <button class="toggle-btn active" id="expenseBtn" onclick="setType('expense')">Expense</button>
+                <button class="toggle-btn" id="incomeBtn" onclick="setType('income')">Income</button>
+            </div>
+
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="category" required onchange="updateSubcategories()">
+                            <option value="">Select...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Subcategory</label>
+                        <select id="subcategory" required>
+                            <option value="">Select...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <div class="amount-input">
+                            <span>$</span>
+                            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="paymentMethod" required>
+                            <option value="">Select...</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="E-Wallet">E-Wallet</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="notes" placeholder="Add any details..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Add Expense</button>
+            </form>
+
+            <div class="status" id="status"></div>
+
+            <div class="recent-entries" id="recentEntries">
+                <h3>Recent Entries</h3>
+                <div id="entriesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - UPDATE THIS WITH YOUR SCRIPT URL
+        // ============================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY6mdZG9TkitqJfv7UMXUnu63kUq-O57S7NQGi1-O6V9Bkb2P8fEYP4QBsTjMOLzyt3A/exec';
+        // ============================================
+
+        let currentType = 'expense';
+        let recentEntries = JSON.parse(localStorage.getItem('recentEntries') || '[]');
+
+        // Categories and subcategories - customize these to match your sheet
+        const categories = {
+            expense: {
+                'Food & Dining': ['Groceries', 'Restaurants', 'Coffee', 'Delivery', 'Other'],
+                'Transportation': ['Gas', 'Public Transit', 'Uber/Grab', 'Parking', 'Maintenance', 'Other'],
+                'Housing': ['Rent', 'Utilities', 'Internet', 'Repairs', 'Supplies', 'Other'],
+                'Entertainment': ['Movies', 'Games', 'Streaming', 'Events', 'Hobbies', 'Other'],
+                'Shopping': ['Clothing', 'Electronics', 'Home', 'Personal Care', 'Other'],
+                'Health': ['Doctor', 'Medicine', 'Gym', 'Insurance', 'Other'],
+                'Education': ['Courses', 'Books', 'Supplies', 'Other'],
+                'Bills': ['Phone', 'Insurance', 'Subscriptions', 'Other'],
+                'Other': ['Miscellaneous', 'Gifts', 'Donations', 'Other']
+            },
+            income: {
+                'Salary': ['Regular', 'Bonus', 'Overtime', 'Other'],
+                'Business': ['Sales', 'Services', 'Commissions', 'Other'],
+                'Investment': ['Dividends', 'Interest', 'Capital Gains', 'Other'],
+                'Freelance': ['Projects', 'Consulting', 'Other'],
+                'Other': ['Gifts', 'Refunds', 'Miscellaneous']
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setTodayDate();
+            updateCategories();
+            renderRecentEntries();
+            checkSetup();
+        });
+
+        function checkSetup() {
+            if (GOOGLE_SCRIPT_URL) {
+                document.getElementById('setupNotice').style.display = 'none';
+            }
+        }
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        function setType(type) {
+            currentType = type;
+            const expenseBtn = document.getElementById('expenseBtn');
+            const incomeBtn = document.getElementById('incomeBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (type === 'expense') {
+                expenseBtn.classList.add('active');
+                expenseBtn.classList.remove('income');
+                incomeBtn.classList.remove('active', 'income');
+                submitBtn.classList.remove('income');
+                submitBtn.textContent = 'Add Expense';
+            } else {
+                incomeBtn.classList.add('active', 'income');
+                expenseBtn.classList.remove('active');
+                submitBtn.classList.add('income');
+                submitBtn.textContent = 'Add Income';
+            }
+
+            updateCategories();
+        }
+
+        function updateCategories() {
+            const categorySelect = document.getElementById('category');
+            const cats = categories[currentType];
+            
+            categorySelect.innerHTML = '<option value="">Select...</option>';
+            Object.keys(cats).forEach(cat => {
+                categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+            
+            document.getElementById('subcategory').innerHTML = '<option value="">Select...</option>';
+        }
+
+        function updateSubcategories() {
+            const category = document.getElementById('category').value;
+            const subcategorySelect = document.getElementById('subcategory');
+            const subcats = categories[currentType][category] || [];
+            
+            subcategorySelect.innerHTML = '<option value="">Select...</option>';
+            subcats.forEach(sub => {
+                subcategorySelect.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+        }
+
+        // Form submission
+        document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const status = document.getElementById('status');
+            
+            // Get form values
+            const data = {
+                date: document.getElementById('date').value,
+                type: currentType === 'expense' ? 'Expense' : 'Income',
+                category: document.getElementById('category').value,
+                subcategory: document.getElementById('subcategory').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                paymentMethod: document.getElementById('paymentMethod').value,
+                notes: document.getElementById('notes').value
+            };
+
+            // Validate
+            if (!data.category || !data.subcategory || !data.amount || !data.paymentMethod) {
+                showStatus('Please fill in all required fields', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                if (!GOOGLE_SCRIPT_URL) {
+                    throw new Error('Google Script URL not configured');
+                }
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Save to local storage for recent entries display
+                saveToLocal(data);
+                
+                showStatus('Successfully added to your sheet! ✓', 'success');
+                resetForm();
+
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Still save locally even if sheet fails
+                saveToLocal(data);
+                
+                if (!GOOGLE_SCRIPT_URL) {
+                    showStatus('Saved locally. Configure Google Script URL to sync.', 'error');
+                } else {
+                    showStatus('Added! (Check sheet to confirm)', 'success');
+                }
+                resetForm();
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = currentType === 'expense' ? 'Add Expense' : 'Add Income';
+        });
+
+        function saveToLocal(data) {
+            recentEntries.unshift({
+                ...data,
+                id: Date.now()
+            });
+            recentEntries = recentEntries.slice(0, 10); // Keep only last 10
+            localStorage.setItem('recentEntries', JSON.stringify(recentEntries));
+            renderRecentEntries();
+        }
+
+        function renderRecentEntries() {
+            const list = document.getElementById('entriesList');
+            
+            if (recentEntries.length === 0) {
+                list.innerHTML = '<p style="color: #8892b0; font-size: 0.85rem; text-align: center; padding: 20px;">No entries yet</p>';
+                return;
+            }
+
+            list.innerHTML = recentEntries.slice(0, 5).map(entry => {
+                const isExpense = entry.type === 'Expense';
+                const icon = isExpense ? '📤' : '📥';
+                const sign = isExpense ? '-' : '+';
+                
+                return `
+                    <div class="entry">
+                        <div class="entry-info">
+                            <div class="entry-icon ${isExpense ? 'expense' : 'income'}">${icon}</div>
+                            <div class="entry-details">
+                                <h4>${entry.category}</h4>
+                                <p>${entry.subcategory} • ${entry.date}</p>
+                            </div>
+                        </div>
+                        <div class="entry-amount ${isExpense ? 'expense' : 'income'}">
+                            ${sign}$${entry.amount.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            
+            setTimeout(() => {
+                status.className = 'status';
+            }, 4000);
+        }
+
+        function resetForm() {
+            document.getElementById('amount').value = '';
+            document.getElementById('notes').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('subcategory').innerHTML = '<option value="">Select...</option>';
+            setTodayDate();
+        }
+    </script>
+</body>
+</html>
